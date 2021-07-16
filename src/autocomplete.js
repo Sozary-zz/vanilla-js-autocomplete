@@ -5,6 +5,7 @@ class AutoComplete {
     this.sortedList = list;
     this.id = id;
     this.chips = [];
+    this.text = null;
     this.showList = false;
     this.filterFunction = filterFunction;
     this.comparaisonFunction = comparaisonFunction;
@@ -13,19 +14,20 @@ class AutoComplete {
 
   toggleDropdown(e) {
     this.showList = !this.showList;
-    e.target.style.transform = `rotate(${180 * +this.showList}deg)`;
+    e.style.transform = `rotate(${180 * +this.showList}deg)`;
     document.querySelector(`${this.id} .ac-body`).style.display = this.showList
       ? "flex"
       : "none";
   }
 
   applyFilter(text) {
+    this.text = text;
     const arrow = document.querySelector(`${this.id} i`);
     if (!this.showList) {
-      this.toggleDropdown({ target: arrow });
+      this.toggleDropdown(arrow);
     }
     if (text === "" && this.showList) {
-      this.toggleDropdown({ target: arrow });
+      this.toggleDropdown(arrow);
     }
 
     this.sortedList = this.list.filter((e) => this.filterFunction(e, text));
@@ -77,20 +79,37 @@ class AutoComplete {
   }
 
   chipsClick(b) {
-    console.log(b, this);
-    // console.log("object");
-    // const label = b.target.innerText;
-    // this.sortedList.push(label);
-    // this.chips.splice(this.chips.indexOf(label), 1);
-    // document.querySelector(`${this.id} .ac-chips`).innerHTML =
-    //   this.renderChips();
-    // document.querySelector(`${this.id} .ac-body`).innerHTML = this.renderList();
-    // this.handleEvents();
+    const label = b.innerText;
+    this.sortedList.push(label);
+    this.chips.splice(this.chips.indexOf(label), 1);
+    console.log("Hey");
+    let toAdd = this.sortedList.filter((s) => this.filterFunction(s, label));
+    console.log(toAdd);
+
+    this.removeChildren(`${this.id} .ac-chips`);
+    this.removeChildren(`${this.id} .ac-body`);
+    
+    document.querySelector(`${this.id} .ac-chips`).innerHTML =
+      this.renderChips();
+
+    document.querySelector(`${this.id} .ac-body`).innerHTML = this.renderList();
+
+    this.handleEvents();
+  }
+
+  removeChildren(element) {
+    var first = element.firstElementChild;
+    while (first) {
+      first.remove();
+      first = e.firstElementChild;
+    }
   }
 
   handleEvents() {
     document.querySelectorAll(`${this.id} .ac-chips button`).forEach((e) => {
-      e.addEventListener("click", this.chipsClick, false);
+      e.addEventListener("click", (e) => {
+        this.chipsClick(e.target);
+      });
     });
 
     document.querySelectorAll(`${this.id} .ac-body button`).forEach((e) => {
@@ -99,32 +118,33 @@ class AutoComplete {
         this.chips.push(label);
         this.sortedList.splice(this.sortedList.indexOf(label), 1);
 
+        this.removeChildren(`${this.id} .ac-chips`);
+        this.removeChildren(`${this.id} .ac-body`);
+
         document.querySelector(`${this.id} .ac-chips`).innerHTML =
           this.renderChips();
         document.querySelector(`${this.id} .ac-body`).innerHTML =
           this.renderList();
+
         this.handleEvents();
       });
     });
-
-    document
-      .querySelector(`${this.id} i`)
-      .removeEventListener("click", this.toggleDropdown);
-    document
-      .querySelector(`${this.id} i`)
-      .addEventListener("click", this.toggleDropdown);
-
-    document
-      .querySelector(`${this.id} input`)
-      .addEventListener("input", (e) => {
-        this.applyFilter(e.target.value);
-      });
   }
 
   render() {
     const dom = this.getDom();
 
     this.renderDom(dom);
+
+    document.querySelector(`${this.id} i`).addEventListener("click", (e) => {
+      this.toggleDropdown(e.target);
+    });
+    document
+      .querySelector(`${this.id} input`)
+      .addEventListener("input", (e) => {
+        this.applyFilter(e.target.value);
+      });
+
     this.handleEvents();
   }
 }
