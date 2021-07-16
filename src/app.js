@@ -1,8 +1,8 @@
-const countries = ["France", "Spain", "Irak", "Italy", "Denmark", "Poland"];
-const countriesAutoComplete = new AutoComplete(
-  "#countries",
-  countries,
-  "Countries",
-  (element, text) => element.toLowerCase().includes(text.toLowerCase()),
-  (a, b) => a.toLowerCase().includes(b.toLowerCase())
+const ingredients = { "Lait de coco": [4, 6], lait: [1, 2], ail: [0, 1, 5] };
+const ingredientsAucomplete = new AutoComplete(
+  ingredients,
+  "#ingredients",
+  "blue",
+  "Ingrédients"
 );
+ingredientsAucomplete.updateConstraints([1, 5]);
