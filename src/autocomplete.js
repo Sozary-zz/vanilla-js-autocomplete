@@ -1,5 +1,5 @@
 class AutoComplete {
-  constructor(id, list, title, filterFunction) {
+  constructor(id, list, title, filterFunction, comparaisonFunction) {
     this.title = title;
     this.list = list;
     this.sortedList = list;
@@ -7,12 +7,13 @@ class AutoComplete {
     this.chips = [];
     this.showList = false;
     this.filterFunction = filterFunction;
+    this.comparaisonFunction = comparaisonFunction;
     this.render();
   }
 
-  toggleDropdown(element) {
+  toggleDropdown(e) {
     this.showList = !this.showList;
-    element.style.transform = `rotate(${180 * +this.showList}deg)`;
+    e.target.style.transform = `rotate(${180 * +this.showList}deg)`;
     document.querySelector(`${this.id} .ac-body`).style.display = this.showList
       ? "flex"
       : "none";
@@ -21,14 +22,19 @@ class AutoComplete {
   applyFilter(text) {
     const arrow = document.querySelector(`${this.id} i`);
     if (!this.showList) {
-      this.toggleDropdown(arrow);
+      this.toggleDropdown({ target: arrow });
     }
     if (text === "" && this.showList) {
-      this.toggleDropdown(arrow);
+      this.toggleDropdown({ target: arrow });
     }
 
     this.sortedList = this.list.filter((e) => this.filterFunction(e, text));
+    this.sortedList = this.sortedList.filter(
+      (s) => !this.chips.find((c) => this.comparaisonFunction(s, c))
+    );
+
     document.querySelector(`${this.id} .ac-body`).innerHTML = this.renderList();
+    this.handleEvents();
   }
 
   getDom() {
@@ -70,19 +76,21 @@ class AutoComplete {
     dom.innerHTML = html;
   }
 
+  chipsClick(b) {
+    console.log(b, this);
+    // console.log("object");
+    // const label = b.target.innerText;
+    // this.sortedList.push(label);
+    // this.chips.splice(this.chips.indexOf(label), 1);
+    // document.querySelector(`${this.id} .ac-chips`).innerHTML =
+    //   this.renderChips();
+    // document.querySelector(`${this.id} .ac-body`).innerHTML = this.renderList();
+    // this.handleEvents();
+  }
+
   handleEvents() {
     document.querySelectorAll(`${this.id} .ac-chips button`).forEach((e) => {
-      e.addEventListener("click", (b) => {
-        const label = b.target.innerText;
-        this.sortedList.push(label);
-        this.chips.splice(this.chips.indexOf(label), 1);
-
-        document.querySelector(`${this.id} .ac-chips`).innerHTML =
-          this.renderChips();
-        document.querySelector(`${this.id} .ac-body`).innerHTML =
-          this.renderList();
-        this.handleEvents();
-      });
+      e.addEventListener("click", this.chipsClick, false);
     });
 
     document.querySelectorAll(`${this.id} .ac-body button`).forEach((e) => {
@@ -99,9 +107,12 @@ class AutoComplete {
       });
     });
 
-    document.querySelector(`${this.id} i`).addEventListener("click", (e) => {
-      this.toggleDropdown(e.target);
-    });
+    document
+      .querySelector(`${this.id} i`)
+      .removeEventListener("click", this.toggleDropdown);
+    document
+      .querySelector(`${this.id} i`)
+      .addEventListener("click", this.toggleDropdown);
 
     document
       .querySelector(`${this.id} input`)
