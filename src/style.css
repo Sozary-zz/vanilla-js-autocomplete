@@ -28,9 +28,6 @@
 .ac-body.blue>* {
     color :#98c0fb
 }
-.ac-body>*:nth-last-of-type(-n+1) {
-  margin-bottom: 10px;
-}
 .ac-body>button{
     border: none;
     border-radius: 5px;
