@@ -79,11 +79,15 @@ class AutoComplete {
 
     this.chips.forEach((item) => {
       const elem = document.createElement("button");
+      const close = document.createElement("i");
 
       elem.innerText = item;
-      elem.onclick = () => {
+      close.onclick = () => {
         this.addToList(item);
       };
+      close.classList.add("far", "fa-times-circle");
+      close.style.marginLeft = "5px";
+      elem.appendChild(close);
       dom.appendChild(elem);
     });
   }
